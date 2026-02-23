@@ -32,6 +32,27 @@ const RANK_ORDER: Record<CardRank, number> = {
   '9': 7, '10': 8, 'J': 9, 'Q': 10, 'K': 11, 'A': 12, '2': 13, 'JOKER': 14
 };
 
+/** 数值到点数的反向映射 */
+const VALUE_TO_RANK: Record<number, CardRank> = {
+  1: '3',
+  2: '4',
+  3: '5',
+  4: '6',
+  5: '7',
+  6: '8',
+  7: '9',
+  8: '10',
+  9: 'J',
+  10: 'Q',
+  11: 'K',
+  12: 'A',
+  13: '2',
+  14: 'JOKER'
+};
+
+/** 非王牌点数 */
+const NON_JOKER_RANKS: CardRank[] = ['3', '4', '5', '6', '7', '8', '9', '10', 'J', 'Q', 'K', 'A', '2'];
+
 // ==================== 核心函数 ====================
 
 /**
@@ -87,11 +108,14 @@ function identifyPatternDirect(cards: RuntimeCard[]): PatternResult {
     if (isAllSameRank(cards)) {
       return createResult('bomb', calculatePower('bomb', cards));
     }
+    return invalidResult();
+  }
+
+  if (n === 5) {
     // 木板（三带二）
     if (isPlate(cards)) {
       return createResult('plate', calculatePower('plate', cards));
     }
-    return invalidResult();
   }
 
   if (n >= 5) {
@@ -166,11 +190,11 @@ function identifyPatternWithWildcards(
     }
   }
 
-  // 木板
-  if (n === 4) {
+  // 木板（三带二）
+  if (n === 5) {
     // 尝试用逢人配凑木板
-    const result = tryReplaceForPlate(cards, wildcards, normalCards);
-    if (result.isValid) return result;
+    const plateResult = tryReplaceForPlate(cards, wildcards, normalCards);
+    if (plateResult.isValid) return plateResult;
   }
 
   return invalidResult();
@@ -185,45 +209,45 @@ function tryReplaceForStraightFlush(
   normalCards: RuntimeCard[],
   numWildcards: number
 ): PatternResult {
-  // 获取所有不同的花色
-  const suits = [...new Set(normalCards.map(c => c.suit))];
-  
-  for (const targetSuit of suits) {
-    // 该花色的牌
+  const n = cards.length;
+  if (n < 5) return invalidResult();
+
+  // 逢人配替换同花顺时，所有普通牌必须同花色且全部参与目标序列。
+  const candidateSuits: CardSuit[] = ['hearts', 'diamonds', 'clubs', 'spades'];
+  for (const targetSuit of candidateSuits) {
     const suitCards = normalCards.filter(c => c.suit === targetSuit);
-    const suitRanks = suitCards.map(c => c.rank).sort((a, b) => RANK_ORDER[a] - RANK_ORDER[b]);
-    
-    // 尝试不同数量的逢人配替换
-    for (let useCount = 1; useCount <= numWildcards; useCount++) {
-      // 需要useCount + suitCards.length张连续牌
-      const totalNeeded = useCount + suitCards.length;
-      if (totalNeeded < 5) continue; // 同花顺至少5张
-      
-      // 枚举可能的起点
-      for (let startRank = 1; startRank <= 14 - totalNeeded + 1; startRank++) {
-        const needed: CardRank[] = [];
-        for (let i = 0; i < totalNeeded; i++) {
-          const rankNum = startRank + i;
-          if (rankNum <= 12) {
-            needed.push(Object.keys(RANK_ORDER).find(k => RANK_ORDER[k as CardRank] === rankNum) as CardRank);
-          }
-        }
-        
-        // 检查suitRanks能否通过替换凑成needed
-        if (canFormWithWildcards(suitRanks, needed, useCount)) {
-          // 构造替换后的牌
-          const replacedCards = buildReplacedCards(suitCards, needed, targetSuit, useCount);
-          return {
-            isValid: true,
-            patternType: 'straight_flush',
-            powerLevel: calculatePower('straight_flush', replacedCards),
-            replacedCards
-          };
-        }
+    if (suitCards.length !== normalCards.length) {
+      continue;
+    }
+
+    const suitValues = suitCards.map(c => RANK_ORDER[c.rank]);
+    if (hasDuplicateValues(suitValues)) {
+      continue;
+    }
+
+    for (let start = 1; start <= 13 - n + 1; start++) {
+      const sequence = buildSequence(start, n);
+      const sequenceSet = new Set(sequence);
+
+      if (suitValues.some(value => !sequenceSet.has(value))) {
+        continue;
       }
+
+      const missingValues = sequence.filter(value => !suitValues.includes(value));
+      if (missingValues.length !== numWildcards) {
+        continue;
+      }
+
+      const replacedCards = buildStraightReplacementCards(suitCards, sequence, targetSuit);
+      return {
+        isValid: true,
+        patternType: 'straight_flush',
+        powerLevel: calculatePower('straight_flush', replacedCards),
+        replacedCards
+      };
     }
   }
-  
+
   return invalidResult();
 }
 
@@ -236,34 +260,36 @@ function tryReplaceForStraight(
   normalCards: RuntimeCard[],
   numWildcards: number
 ): PatternResult {
-  const ranks = normalCards.map(c => c.rank).sort((a, b) => RANK_ORDER[a] - RANK_ORDER[b]);
-  const uniqueRanks = [...new Set(ranks)];
-  
-  // 尝试用不同数量的逢人配
-  for (let useCount = 1; useCount <= numWildcards; useCount++) {
-    const totalNeeded = useCount + uniqueRanks.length;
-    if (totalNeeded < 5) continue;
-    
-    // 尝试不同起点
-    for (let startRank = 1; startRank <= 14 - totalNeeded + 1; startRank++) {
-      const needed: number[] = [];
-      for (let i = 0; i < totalNeeded; i++) {
-        needed.push(startRank + i);
-      }
-      
-      if (canFormWithWildcardsNum(ranks, needed, useCount)) {
-        // 构造替换后的牌
-        const replacedCards = buildStraightCards(uniqueRanks, needed, useCount);
-        return {
-          isValid: true,
-          patternType: 'straight',
-          powerLevel: calculatePower('straight', replacedCards),
-          replacedCards
-        };
-      }
-    }
+  const n = cards.length;
+  if (n < 5) return invalidResult();
+
+  const normalValues = normalCards.map(c => RANK_ORDER[c.rank]);
+  if (hasDuplicateValues(normalValues)) {
+    return invalidResult();
   }
-  
+
+  for (let start = 1; start <= 13 - n + 1; start++) {
+    const sequence = buildSequence(start, n);
+    const sequenceSet = new Set(sequence);
+
+    if (normalValues.some(value => !sequenceSet.has(value))) {
+      continue;
+    }
+
+    const missingValues = sequence.filter(value => !normalValues.includes(value));
+    if (missingValues.length !== numWildcards) {
+      continue;
+    }
+
+    const replacedCards = buildStraightReplacementCards(normalCards, sequence, 'hearts');
+    return {
+      isValid: true,
+      patternType: 'straight',
+      powerLevel: calculatePower('straight', replacedCards),
+      replacedCards
+    };
+  }
+
   return invalidResult();
 }
 
@@ -276,43 +302,32 @@ function tryReplaceForBomb(
   normalCards: RuntimeCard[],
   numWildcards: number
 ): PatternResult {
-  // 统计各点数牌数
-  const rankCount = new Map<CardRank, number>();
-  for (const card of normalCards) {
-    rankCount.set(card.rank, (rankCount.get(card.rank) || 0) + 1);
+  const n = cards.length;
+  if (n < 4 || normalCards.length === 0) {
+    return invalidResult();
   }
-  
-  // 已有炸弹
-  for (const [rank, count] of rankCount) {
-    if (count >= 4) {
-      // 4张或更多相同点数，已经是炸弹
-      const bombCards = normalCards.filter(c => c.rank === rank);
-      return createResult('bomb', calculatePower('bomb', bombCards));
-    }
+
+  // 严格要求：除逢人配外的所有牌点数必须一致，且全部牌都参与炸弹。
+  const targetRank = normalCards[0].rank;
+  if (normalCards.some(card => card.rank !== targetRank)) {
+    return invalidResult();
   }
-  
-  // 用逢人配凑炸弹：需要4-numWildcards张相同点数 + numWildcards张逢人配
-  const neededForBomb = 4 - numWildcards;
-  if (neededForBomb <= 0) {
-    // 全部是逢人配，也是炸弹（但理论上不可能有4个逢人配）
-    return createResult('bomb', 1000 + numWildcards * 100);
+
+  const bombCards: RuntimeCard[] = [...normalCards];
+  for (let i = 0; i < numWildcards; i++) {
+    bombCards.push(createSyntheticCard(`wildcard_bomb_${targetRank}_${i}`, targetRank, 'hearts'));
   }
-  
-  // 找是否有至少neededForBomb张相同点数的牌
-  for (const [rank, count] of rankCount) {
-    if (count >= neededForBomb) {
-      const baseCards = normalCards.filter(c => c.rank === rank).slice(0, neededForBomb);
-      const bombCards = [...baseCards, ...wildcards];
-      return {
-        isValid: true,
-        patternType: 'bomb',
-        powerLevel: calculatePower('bomb', bombCards),
-        replacedCards: bombCards
-      };
-    }
+
+  if (bombCards.length !== n) {
+    return invalidResult();
   }
-  
-  return invalidResult();
+
+  return {
+    isValid: true,
+    patternType: 'bomb',
+    powerLevel: calculatePower('bomb', bombCards),
+    replacedCards: bombCards
+  };
 }
 
 /**
@@ -323,170 +338,154 @@ function tryReplaceForPlate(
   wildcards: RuntimeCard[],
   normalCards: RuntimeCard[]
 ): PatternResult {
-  if (normalCards.length < 3) return invalidResult();
-  
-  // 找三张相同点数的牌
+  if (cards.length !== 5) return invalidResult();
+
   const rankCount = new Map<CardRank, number>();
   for (const card of normalCards) {
     rankCount.set(card.rank, (rankCount.get(card.rank) || 0) + 1);
   }
-  
-  for (const [rank, count] of rankCount) {
-    if (count >= 3) {
-      // 已有三张，剩余一张用逢人配
-      const threeCards = normalCards.filter(c => c.rank === rank).slice(0, 3);
-      const plateCards = [...threeCards, wildcards[0]];
-      return {
-        isValid: true,
-        patternType: 'plate',
-        powerLevel: calculatePower('plate', threeCards),
-        replacedCards: plateCards
-      };
-    }
-  }
-  
-  // 没有三张，尝试用逢人配+2张凑三张
-  if (wildcards.length >= 1 && normalCards.length >= 2) {
-    // 找两张相同点数的牌
-    for (const [rank, count] of rankCount) {
-      if (count >= 2) {
-        const pairCards = normalCards.filter(c => c.rank === rank).slice(0, 2);
-        const plateCards = [...pairCards, wildcards[0]];
-        return {
+
+  let bestResult: PatternResult | null = null;
+
+  // 穷举三张点数 + 两张点数，确保所有普通牌都能被覆盖，且逢人配数量完全匹配。
+  for (const tripleRank of NON_JOKER_RANKS) {
+    for (const pairRank of NON_JOKER_RANKS) {
+      if (tripleRank === pairRank) continue;
+
+      const hasForeignRank = Array.from(rankCount.keys()).some(
+        rank => rank !== tripleRank && rank !== pairRank
+      );
+      if (hasForeignRank) continue;
+
+      const tripleCount = rankCount.get(tripleRank) ?? 0;
+      const pairCount = rankCount.get(pairRank) ?? 0;
+      if (tripleCount > 3 || pairCount > 2) continue;
+
+      const requiredWildcards = (3 - tripleCount) + (2 - pairCount);
+      if (requiredWildcards !== wildcards.length) continue;
+
+      const replacedCards = buildPlateReplacementCards(
+        normalCards,
+        tripleRank,
+        pairRank,
+        3 - tripleCount,
+        2 - pairCount
+      );
+      const powerLevel = calculatePower('plate', replacedCards);
+
+      if (!bestResult || powerLevel > bestResult.powerLevel) {
+        bestResult = {
           isValid: true,
           patternType: 'plate',
-          powerLevel: calculatePower('plate', pairCards),
-          replacedCards: plateCards
+          powerLevel,
+          replacedCards
         };
       }
     }
   }
-  
-  return invalidResult();
+
+  return bestResult ?? invalidResult();
 }
 
 // ==================== 辅助函数 ====================
 
 /**
- * 判断能否用wildcards替换形成目标序列
+ * 构建连续点数序列
  */
-function canFormWithWildcards(
-  have: CardRank[], 
-  need: CardRank[], 
-  numWildcards: number
-): boolean {
-  let wildcardsLeft = numWildcards;
-  
-  for (const target of need) {
-    if (have.includes(target)) {
-      have = have.filter(h => h !== target);
-    } else if (wildcardsLeft > 0) {
-      wildcardsLeft--;
-    } else {
-      return false;
-    }
+function buildSequence(start: number, length: number): number[] {
+  const sequence: number[] = [];
+  for (let i = 0; i < length; i++) {
+    sequence.push(start + i);
   }
-  
-  return true;
+  return sequence;
 }
 
 /**
- * 判断能否用wildcards替换形成目标序列（数字版本）
+ * 判断点数数组是否有重复
  */
-function canFormWithWildcardsNum(
-  have: CardRank[], 
-  need: number[], 
-  numWildcards: number
-): boolean {
-  let wildcardsLeft = numWildcards;
-  const haveNums = have.map(r => RANK_ORDER[r]);
-  
-  for (const target of need) {
-    const idx = haveNums.indexOf(target);
-    if (idx >= 0) {
-      haveNums.splice(idx, 1);
-    } else if (wildcardsLeft > 0) {
-      wildcardsLeft--;
-    } else {
-      return false;
-    }
-  }
-  
-  return true;
+function hasDuplicateValues(values: number[]): boolean {
+  return new Set(values).size !== values.length;
 }
 
 /**
- * 构建替换后的同花顺牌
+ * 创建替换后的运行时牌
  */
-function buildReplacedCards(
-  suitCards: RuntimeCard[], 
-  needed: CardRank[], 
-  suit: CardSuit,
-  useCount: number
+function createSyntheticCard(id: string, rank: CardRank, suit: CardSuit): RuntimeCard {
+  const suitBonus: Record<CardSuit, number> = {
+    hearts: 4,
+    diamonds: 3,
+    clubs: 2,
+    spades: 1,
+    joker: 0
+  };
+
+  return {
+    id,
+    suit,
+    rank,
+    deckIndex: 0,
+    logicValue: RANK_ORDER[rank] * 10 + suitBonus[suit],
+    isWildcard: false,
+    isSelected: false
+  };
+}
+
+/**
+ * 构建替换后的顺子/同花顺牌组
+ */
+function buildStraightReplacementCards(
+  normalCards: RuntimeCard[],
+  sequence: number[],
+  suitForWildcard: CardSuit
 ): RuntimeCard[] {
-  const result: RuntimeCard[] = [...suitCards];
-  const existingRanks = new Set(suitCards.map(c => c.rank));
-  
-  let used = 0;
-  for (const rank of needed) {
-    if (!existingRanks.has(rank) && used < useCount) {
-      // 用逢人配替换
-      result.push({
-        id: `wildcard_replaced_${rank}`,
-        suit,
-        rank,
-        deckIndex: 0,
-        logicValue: RANK_ORDER[rank] * 10 + 4,
-        isWildcard: false, // 替换后不再是逢人配
-        isSelected: false
-      });
-      used++;
-    }
+  const cardByValue = new Map<number, RuntimeCard>();
+  for (const card of normalCards) {
+    cardByValue.set(RANK_ORDER[card.rank], card);
   }
-  
+
+  const result: RuntimeCard[] = [];
+  let wildcardIndex = 0;
+
+  for (const value of sequence) {
+    const existingCard = cardByValue.get(value);
+    if (existingCard) {
+      result.push(existingCard);
+      continue;
+    }
+
+    const rank = VALUE_TO_RANK[value];
+    result.push(
+      createSyntheticCard(
+        `wildcard_sequence_${rank}_${wildcardIndex++}`,
+        rank,
+        suitForWildcard
+      )
+    );
+  }
+
   return result;
 }
 
 /**
- * 构建替换后的顺子牌
+ * 构建替换后的木板牌组（三带二）
  */
-function buildStraightCards(
-  uniqueRanks: CardRank[], 
-  needed: number[],
-  useCount: number
+function buildPlateReplacementCards(
+  normalCards: RuntimeCard[],
+  tripleRank: CardRank,
+  pairRank: CardRank,
+  addTripleCount: number,
+  addPairCount: number
 ): RuntimeCard[] {
-  const result: RuntimeCard[] = [];
-  const existingSet = new Set(uniqueRanks);
-  let used = 0;
-  
-  for (const num of needed) {
-    const rank = Object.keys(RANK_ORDER).find(k => RANK_ORDER[k as CardRank] === num) as CardRank;
-    if (existingSet.has(rank)) {
-      // 使用已有的牌
-      result.push({
-        id: `straight_${rank}`,
-        suit: 'hearts', // 任意花色
-        rank,
-        deckIndex: 0,
-        logicValue: num * 10,
-        isWildcard: false,
-        isSelected: false
-      });
-    } else if (used < useCount) {
-      // 用逢人配替换
-      result.push({
-        id: `wildcard_straight_${rank}`,
-        suit: 'hearts',
-        rank,
-        deckIndex: 0,
-        logicValue: num * 10,
-        isWildcard: false,
-        isSelected: false
-      });
-      used++;
-    }
+  const result: RuntimeCard[] = [...normalCards];
+
+  for (let i = 0; i < addTripleCount; i++) {
+    result.push(createSyntheticCard(`wildcard_plate_${tripleRank}_${i}`, tripleRank, 'hearts'));
   }
-  
+
+  for (let i = 0; i < addPairCount; i++) {
+    result.push(createSyntheticCard(`wildcard_plate_${pairRank}_${i}`, pairRank, 'spades'));
+  }
+
   return result;
 }
 
@@ -564,15 +563,15 @@ function isBomb(cards: RuntimeCard[]): boolean {
  * 判断是否为木板（三带二）
  */
 function isPlate(cards: RuntimeCard[]): boolean {
-  if (cards.length !== 4) return false;
+  if (cards.length !== 5) return false;
   
   const rankCount = new Map<CardRank, number>();
   for (const card of cards) {
     rankCount.set(card.rank, (rankCount.get(card.rank) || 0) + 1);
   }
   
-  const counts = Array.from(rankCount.values());
-  return (counts.includes(3) && counts.includes(2));
+  const counts = Array.from(rankCount.values()).sort((a, b) => b - a);
+  return counts.length === 2 && counts[0] === 3 && counts[1] === 2;
 }
 
 /**
@@ -626,83 +625,3 @@ function calculatePower(patternType: PatternType, cards: RuntimeCard[]): number 
 
 // ==================== 导出主函数 ====================
 // identifyPattern 已在上面导出
-
-// ==================== 测试用例 ====================
-
-console.log('========== 规则引擎测试 ==========\n');
-
-// 测试1: 普通的顺子校验
-console.log('【测试1】普通顺子校验 (5,6,7,8,9)');
-const testStraight1: RuntimeCard[] = [
-  { id: '1', suit: 'hearts', rank: '5', deckIndex: 0, logicValue: 51, isWildcard: false, isSelected: false },
-  { id: '2', suit: 'diamonds', rank: '6', deckIndex: 0, logicValue: 62, isWildcard: false, isSelected: false },
-  { id: '3', suit: 'clubs', rank: '7', deckIndex: 0, logicValue: 73, isWildcard: false, isSelected: false },
-  { id: '4', suit: 'spades', rank: '8', deckIndex: 0, logicValue: 84, isWildcard: false, isSelected: false },
-  { id: '5', suit: 'hearts', rank: '9', deckIndex: 0, logicValue: 94, isWildcard: false, isSelected: false },
-];
-const result1 = identifyPattern(testStraight1);
-console.log(`结果: isValid=${result1.isValid}, patternType=${result1.patternType}, powerLevel=${result1.powerLevel}`);
-console.assert(result1.isValid === true, '普通顺子应该有效');
-console.assert(result1.patternType === 'straight', '牌型应该是straight');
-console.log('✅ 测试1通过\n');
-
-// 测试2: 包含1张isWildcard的顺子校验
-console.log('【测试2】包含逢人配的顺子校验 (5,6,7,8 + 逢人配)');
-const testStraight2: RuntimeCard[] = [
-  { id: '1', suit: 'hearts', rank: '5', deckIndex: 0, logicValue: 51, isWildcard: false, isSelected: false },
-  { id: '2', suit: 'diamonds', rank: '6', deckIndex: 0, logicValue: 62, isWildcard: false, isSelected: false },
-  { id: '3', suit: 'clubs', rank: '7', deckIndex: 0, logicValue: 73, isWildcard: false, isSelected: false },
-  { id: '4', suit: 'spades', rank: '8', deckIndex: 0, logicValue: 84, isWildcard: false, isSelected: false },
-  { id: '5', suit: 'hearts', rank: '9', deckIndex: 0, logicValue: 94, isWildcard: true, isSelected: false }, // 逢人配
-];
-const result2 = identifyPattern(testStraight2);
-console.log(`结果: isValid=${result2.isValid}, patternType=${result2.patternType}, powerLevel=${result2.powerLevel}`);
-console.log(`替换后的牌: ${result2.replacedCards?.map(c => c.rank).join(',')}`);
-console.assert(result2.isValid === true, '含逢人配的顺子应该有效');
-console.assert(result2.patternType === 'straight', '牌型应该是straight');
-console.log('✅ 测试2通过\n');
-
-// 测试3: 包含1张isWildcard的炸弹校验
-console.log('【测试3】包含逢人配的炸弹校验 (8,8,8 + 逢人配)');
-const testBomb: RuntimeCard[] = [
-  { id: '1', suit: 'hearts', rank: '8', deckIndex: 0, logicValue: 158, isWildcard: false, isSelected: false },
-  { id: '2', suit: 'diamonds', rank: '8', deckIndex: 0, logicValue: 153, isWildcard: false, isSelected: false },
-  { id: '3', suit: 'clubs', rank: '8', deckIndex: 0, logicValue: 152, isWildcard: false, isSelected: false },
-  { id: '4', suit: 'hearts', rank: '8', deckIndex: 0, logicValue: 158, isWildcard: true, isSelected: false }, // 逢人配
-];
-const result3 = identifyPattern(testBomb);
-console.log(`结果: isValid=${result3.isValid}, patternType=${result3.patternType}, powerLevel=${result3.powerLevel}`);
-console.log(`替换后的牌: ${result3.replacedCards?.map(c => c.rank).join(',')}`);
-console.assert(result3.isValid === true, '含逢人配的炸弹应该有效');
-console.assert(result3.patternType === 'bomb', '牌型应该是bomb');
-console.log('✅ 测试3通过\n');
-
-// 测试4: 无效牌型
-console.log('【测试4】无效牌型校验 (3,5,7,9)');
-const testInvalid: RuntimeCard[] = [
-  { id: '1', suit: 'hearts', rank: '3', deckIndex: 0, logicValue: 31, isWildcard: false, isSelected: false },
-  { id: '2', suit: 'diamonds', rank: '5', deckIndex: 0, logicValue: 52, isWildcard: false, isSelected: false },
-  { id: '3', suit: 'clubs', rank: '7', deckIndex: 0, logicValue: 73, isWildcard: false, isSelected: false },
-  { id: '4', suit: 'spades', rank: '9', deckIndex: 0, logicValue: 94, isWildcard: false, isSelected: false },
-];
-const result4 = identifyPattern(testInvalid);
-console.log(`结果: isValid=${result4.isValid}, patternType=${result4.patternType}, powerLevel=${result4.powerLevel}`);
-console.assert(result4.isValid === false, '不连续的牌应该无效');
-console.log('✅ 测试4通过\n');
-
-// 测试5: 同花顺测试
-console.log('【测试5】同花顺校验 (红桃5,6,7,8,9)');
-const testStraightFlush: RuntimeCard[] = [
-  { id: '1', suit: 'hearts', rank: '5', deckIndex: 0, logicValue: 54, isWildcard: false, isSelected: false },
-  { id: '2', suit: 'hearts', rank: '6', deckIndex: 0, logicValue: 64, isWildcard: false, isSelected: false },
-  { id: '3', suit: 'hearts', rank: '7', deckIndex: 0, logicValue: 74, isWildcard: false, isSelected: false },
-  { id: '4', suit: 'hearts', rank: '8', deckIndex: 0, logicValue: 84, isWildcard: false, isSelected: false },
-  { id: '5', suit: 'hearts', rank: '9', deckIndex: 0, logicValue: 94, isWildcard: false, isSelected: false },
-];
-const result5 = identifyPattern(testStraightFlush);
-console.log(`结果: isValid=${result5.isValid}, patternType=${result5.patternType}, powerLevel=${result5.powerLevel}`);
-console.assert(result5.isValid === true, '同花顺应该有效');
-console.assert(result5.patternType === 'straight_flush', '牌型应该是straight_flush');
-console.log('✅ 测试5通过\n');
-
-console.log('========== 所有测试完成 ==========');
