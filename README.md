@@ -90,3 +90,7 @@ The frontend includes:
 - LLM and persona settings panel
 
 See [frontend/README.md](frontend/README.md) for frontend details.
+
+## Contributing
+
+See [CONTRIBUTING.md](CONTRIBUTING.md) for development setup, testing expectations, issue reporting, and pull request guidelines.

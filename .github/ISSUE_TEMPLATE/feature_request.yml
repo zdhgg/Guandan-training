@@ -1,0 +1,67 @@
+name: Feature request
+description: Propose a new feature or meaningful improvement
+title: "[Feature]: "
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for suggesting an improvement.
+
+        You can write this form in Chinese or English.
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem or opportunity
+      description: What problem are you trying to solve?
+      placeholder: The current workflow is difficult because ...
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposed solution
+      description: Describe the change you want to see
+      placeholder: We should add ...
+    validations:
+      required: true
+  - type: textarea
+    id: value
+    attributes:
+      label: Why this matters
+      description: Explain the expected benefit to users or maintainers
+      placeholder: This would help because ...
+    validations:
+      required: true
+  - type: dropdown
+    id: area
+    attributes:
+      label: Related area
+      options:
+        - Frontend
+        - Backend
+        - Battle mode
+        - Training mode
+        - LLM settings / integration
+        - Build / CI
+        - Documentation
+        - Other
+    validations:
+      required: true
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives considered
+      description: Optional, but helpful if you explored other ideas
+      placeholder: We also considered ...
+  - type: textarea
+    id: extra
+    attributes:
+      label: Mockups, references, or examples
+      description: Screenshots, links, or sample APIs are welcome
+  - type: checkboxes
+    id: checks
+    attributes:
+      label: Confirmation
+      options:
+        - label: I checked the README / existing issues before opening this request
+          required: true
