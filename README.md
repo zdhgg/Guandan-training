@@ -1,89 +1,86 @@
-# Guandan Training Backend
+# Guandan Training
 
-A Node.js + TypeScript backend API for Guandan training platform.
+Guandan Training is a monorepo for a Guandan practice system with a TypeScript backend and a Vue 3 frontend.
 
-## 🚀 Quick Start
+The current `1.0.0` scope focuses on:
 
-### Prerequisites
-- Node.js (v18 or higher)
-- npm or yarn
+- Least-moves hand grouping training and legality validation
+- Human-vs-AI battle mode
+- Full AI battle spectating mode
+- Battle timeline replay and recent session recovery
+- LLM connectivity testing, seat personalities, and strategy tuning
 
-### Installation
+## Repository layout
 
-```bash
-# Install dependencies
-npm install
-
-# Copy environment variables
-cp .env.example .env
-
-# Edit .env file with your configuration
-```
-
-### Development
-
-```bash
-# Run in development mode with hot reload
-npm run dev
-
-# Or run with ts-node directly
-npm run dev:ts
-```
-
-### Production
-
-```bash
-# Build the project
-npm run build
-
-# Start the production server
-npm start
-```
-
-## 📁 Project Structure
-
-```
+```text
 guandan-training/
-├── src/
-│   └── app.ts          # Main application entry point
-├── dist/               # Compiled JavaScript (generated)
-├── .env.example        # Environment variables template
-├── .gitignore          # Git ignore file
-├── package.json        # Dependencies and scripts
-├── tsconfig.json       # TypeScript configuration
-└── README.md           # This file
+|- backend/   # Express + TypeScript + Prisma API
+|- frontend/  # Vue 3 + Vite client
+|- CHANGELOG.md
+`- README.md
 ```
 
-## 🔧 Scripts
+## Requirements
 
-- `npm run build` - Compile TypeScript to JavaScript
-- `npm start` - Start the production server
-- `npm run dev` - Start development server with nodemon
-- `npm run dev:ts` - Start development server with ts-node
-- `npm run clean` - Clean build artifacts
-- `npm run tsc` - Run TypeScript compiler
+- Node.js `^20.19.0 || >=22.12.0`
+- npm 10+
 
-## 🛠️ Technologies
+The frontend uses Vite 7, so Node 20.19+ is the safe baseline for the whole repository.
 
-- **Node.js** - JavaScript runtime
-- **TypeScript** - Type-safe JavaScript
-- **Express** - Web framework
-- **dotenv** - Environment variable management
+## Quick start
 
-## 📝 Environment Variables
+1. Prepare the backend
 
-Create a `.env` file based on `.env.example`:
+   Copy `backend/.env.example` to `backend/.env`, then adjust the values you need.
 
-```bash
-PORT=3000
-NODE_ENV=development
-```
+   ```bash
+   cd backend
+   npm install
+   npx prisma migrate deploy
+   npm run dev
+   ```
 
-## 📡 API Endpoints
+2. Prepare the frontend in a second terminal
 
-- `GET /` - Welcome message
-- `GET /health` - Health check endpoint
+   Copy `frontend/.env.example` to `frontend/.env` if you need to override defaults.
 
-## 📄 License
+   ```bash
+   cd frontend
+   npm install
+   npm run dev
+   ```
 
-ISC
+3. Open the app
+
+- Frontend: `http://localhost:3005`
+- Backend health check: `http://localhost:8005/health`
+
+## Validation status
+
+The current codebase has been checked with:
+
+- `backend`: `npm test`, `npm run build`
+- `frontend`: `npm test`, `npm run build`
+
+## Backend overview
+
+The backend exposes:
+
+- Match creation, initial-hand lookup, play submission, and action logs
+- Training APIs for new hands, legality validation, and auto grouping
+- Battle APIs for start, play, stream play, AI advance, next round, tribute flow, metrics, and session recovery
+- LLM connectivity ping and runtime header overrides
+
+See [backend/README.md](backend/README.md) for backend setup details.
+
+## Frontend overview
+
+The frontend includes:
+
+- Lobby and mode selection
+- Battle table with timeline review
+- Least-moves training workflow
+- Rules page
+- LLM and persona settings panel
+
+See [frontend/README.md](frontend/README.md) for frontend details.
