@@ -4,40 +4,38 @@
 [![Release](https://img.shields.io/github/v/release/zdhgg/Guandan-training)](https://github.com/zdhgg/Guandan-training/releases/tag/v1.0.0)
 [![License](https://img.shields.io/github/license/zdhgg/Guandan-training)](https://github.com/zdhgg/Guandan-training/blob/main/LICENSE)
 
-Guandan Training is a monorepo for a Guandan practice system with a TypeScript backend and a Vue 3 frontend.
+Guandan Training 是一个面向掼蛋训练的智能化系统仓库，采用前后端分离的 monorepo 结构，包含 TypeScript 后端和 Vue 3 前端。
 
-一个面向掼蛋训练的智能化系统，支持理牌训练、实战模拟、全 AI 对战观战，以及 LLM 驱动的人格与策略调参。
+当前 `1.0.0` 版本主要包含以下能力：
 
-The current `1.0.0` scope focuses on:
+- 最少手数理牌训练与牌组合法性校验
+- 人机实战模式
+- 全 AI 对战观战模式
+- 对局时间轴回放与最近对局恢复
+- LLM 连通性测试、座位人格配置与策略调参
 
-- Least-moves hand grouping training and legality validation
-- Human-vs-AI battle mode
-- Full AI battle spectating mode
-- Battle timeline replay and recent session recovery
-- LLM connectivity testing, seat personalities, and strategy tuning
-
-## Repository layout
+## 仓库结构
 
 ```text
 guandan-training/
-|- backend/   # Express + TypeScript + Prisma API
-|- frontend/  # Vue 3 + Vite client
+|- backend/   # Express + TypeScript + Prisma 后端
+|- frontend/  # Vue 3 + Vite 前端
 |- CHANGELOG.md
 `- README.md
 ```
 
-## Requirements
+## 环境要求
 
 - Node.js `^20.19.0 || >=22.12.0`
 - npm 10+
 
-The frontend uses Vite 7, so Node 20.19+ is the safe baseline for the whole repository.
+由于前端使用 Vite 7，建议整个仓库统一使用 Node 20.19 及以上版本。
 
-## Quick start
+## 快速开始
 
-1. Prepare the backend
+1. 准备后端
 
-   Copy `backend/.env.example` to `backend/.env`, then adjust the values you need.
+   将 `backend/.env.example` 复制为 `backend/.env`，再按需要修改配置：
 
    ```bash
    cd backend
@@ -46,9 +44,9 @@ The frontend uses Vite 7, so Node 20.19+ is the safe baseline for the whole repo
    npm run dev
    ```
 
-2. Prepare the frontend in a second terminal
+2. 在第二个终端准备前端
 
-   Copy `frontend/.env.example` to `frontend/.env` if you need to override defaults.
+   如果需要覆盖默认配置，可将 `frontend/.env.example` 复制为 `frontend/.env`：
 
    ```bash
    cd frontend
@@ -56,41 +54,41 @@ The frontend uses Vite 7, so Node 20.19+ is the safe baseline for the whole repo
    npm run dev
    ```
 
-3. Open the app
+3. 打开本地服务
 
-- Frontend: `http://localhost:3005`
-- Backend health check: `http://localhost:8005/health`
+- 前端：`http://localhost:3005`
+- 后端健康检查：`http://localhost:8005/health`
 
-## Validation status
+## 验证情况
 
-The current codebase has been checked with:
+当前代码已完成以下验证：
 
 - `backend`: `npm test`, `npm run build`
 - `frontend`: `npm test`, `npm run build`
 
-## Backend overview
+## 后端概览
 
-The backend exposes:
+后端目前提供：
 
-- Match creation, initial-hand lookup, play submission, and action logs
-- Training APIs for new hands, legality validation, and auto grouping
-- Battle APIs for start, play, stream play, AI advance, next round, tribute flow, metrics, and session recovery
-- LLM connectivity ping and runtime header overrides
+- 对局创建、开局手牌查询、出牌提交、操作日志查询
+- 训练模式的新手牌生成、合法性校验、自动理牌
+- 实战模式的开局、出牌、流式出牌、AI 推进、下一局、进贡流程、指标和会话恢复
+- LLM 连通性测试与运行时请求头覆盖配置
 
-See [backend/README.md](backend/README.md) for backend setup details.
+详细说明见 [backend/README.md](backend/README.md)。
 
-## Frontend overview
+## 前端概览
 
-The frontend includes:
+前端目前包含：
 
-- Lobby and mode selection
-- Battle table with timeline review
-- Least-moves training workflow
-- Rules page
-- LLM and persona settings panel
+- 首页大厅与模式选择
+- 带时间轴回看的实战牌桌
+- 最少手数理牌训练流程
+- 规则说明页面
+- LLM 与人格配置面板
 
-See [frontend/README.md](frontend/README.md) for frontend details.
+详细说明见 [frontend/README.md](frontend/README.md)。
 
-## Contributing
+## 参与贡献
 
-See [CONTRIBUTING.md](CONTRIBUTING.md) for development setup, testing expectations, issue reporting, and pull request guidelines.
+开发环境、测试要求、issue 提交流程和 PR 规范见 [CONTRIBUTING.md](CONTRIBUTING.md)。
