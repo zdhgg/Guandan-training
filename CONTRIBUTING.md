@@ -1,23 +1,23 @@
-# Contributing
+# 参与贡献
 
-Thanks for contributing to Guandan Training.
+感谢你为 Guandan Training 做出贡献。
 
-Chinese and English issues / pull requests are both welcome.
+仓库欢迎使用中文或英文提交 issue 和 pull request。
 
-## Before you start
+## 开始之前
 
-- For small fixes, direct pull requests are welcome.
-- For larger changes, please open an issue first so we can align on scope.
-- Keep changes focused. Avoid mixing unrelated refactors, formatting, and feature work in the same PR.
+- 小范围修复可以直接发起 PR。
+- 涉及范围较大的改动，建议先开一个 issue 对齐目标和范围。
+- 请尽量保持改动聚焦，不要在同一个 PR 中混入无关重构、格式化和功能变更。
 
-## Development setup
+## 开发环境
 
-Requirements:
+环境要求：
 
 - Node.js `^20.19.0 || >=22.12.0`
 - npm 10+
 
-Backend setup:
+后端启动：
 
 ```bash
 cd backend
@@ -27,7 +27,7 @@ npx prisma migrate deploy
 npm run dev
 ```
 
-Frontend setup:
+前端启动：
 
 ```bash
 cd frontend
@@ -36,34 +36,34 @@ npm install
 npm run dev
 ```
 
-Default local URLs:
+本地默认地址：
 
-- Frontend: `http://localhost:3005`
-- Backend: `http://localhost:8005`
+- 前端：`http://localhost:3005`
+- 后端：`http://localhost:8005`
 
-## Project structure
+## 项目结构
 
-- `backend/`: Express + TypeScript + Prisma API
-- `frontend/`: Vue 3 + Vite client
-- `.github/workflows/ci.yml`: repository CI
+- `backend/`：Express + TypeScript + Prisma 后端
+- `frontend/`：Vue 3 + Vite 前端
+- `.github/workflows/ci.yml`：仓库 CI 配置
 
-## Branches
+## 分支建议
 
-- Branch from `main`
-- Use a short, descriptive branch name such as `fix/cors-headers` or `feat/battle-metrics`
+- 请从 `main` 分支切出新分支
+- 建议使用简短、明确的分支名，例如 `fix/cors-headers` 或 `feat/battle-metrics`
 
-## What to include in a contribution
+## 提交改动时建议包含
 
-- Add or update tests when behavior changes
-- Update docs when setup, API behavior, or user-visible workflows change
-- Keep commits readable and scoped
-- Prefer follow-up cleanup in the same PR if the change introduces temporary workarounds
+- 行为变化时补充或更新测试
+- 安装方式、API 行为或用户可见流程变化时更新文档
+- 保持提交信息清晰、改动范围明确
+- 如果改动里引入了临时兼容逻辑，优先在同一个 PR 中顺手清理掉
 
-## Testing expectations
+## 测试要求
 
-Run the relevant checks before opening a PR.
+在发起 PR 前，请至少运行与你改动相关的检查。
 
-Backend:
+后端：
 
 ```bash
 cd backend
@@ -71,7 +71,7 @@ npm test
 npm run build
 ```
 
-Frontend:
+前端：
 
 ```bash
 cd frontend
@@ -79,33 +79,33 @@ npm test
 npm run build
 ```
 
-If you cannot run a check locally, mention that clearly in the PR description.
+如果你本地无法运行某项检查，请在 PR 描述里明确说明原因。
 
-## Code guidelines
+## 代码规范
 
-- Preserve the existing repository structure and naming unless there is a clear reason to change it
-- Avoid committing local-only files such as `.env`, `dist/`, `node_modules/`, or editor settings
-- Prefer small, reviewable changes over large rewrites
-- For frontend changes, include screenshots or short recordings when the UI changes materially
-- For backend changes, include example requests / responses when API behavior changes materially
+- 除非有明确理由，否则请保持现有目录结构和命名方式
+- 不要提交本地专用文件，例如 `.env`、`dist/`、`node_modules/` 或编辑器配置
+- 优先提交小而清晰、便于审查的改动
+- 前端有明显 UI 变化时，请附上截图或简短录屏
+- 后端有明显 API 行为变化时，请附上请求 / 响应示例
 
-## Commits
+## 提交信息
 
-Use concise, descriptive commit messages. Examples:
+建议使用简短、明确的提交信息，例如：
 
 - `fix: allow battle custom headers in cors preflight`
 - `docs: add contribution guides and issue templates`
 - `feat: persist match action logs`
 
-## Pull request checklist
+## PR 自查清单
 
-Before requesting review, make sure:
+在请求 review 前，请确认：
 
-- The branch is up to date with `main`
-- Relevant tests pass locally
-- Docs were updated if needed
-- The PR description explains what changed, why it changed, and how it was verified
+- 分支已经同步到最新的 `main`
+- 相关测试已在本地通过
+- 需要更新的文档已经同步更新
+- PR 描述清楚说明了改了什么、为什么改、如何验证
 
-## Release notes
+## Release 说明
 
-Maintainers publish release tags and GitHub Releases. If your PR changes release-facing behavior, add a short release-note summary in the PR body so it is easy to reuse later.
+维护者会统一发布 tag 和 GitHub Release。如果你的 PR 影响发布说明，建议在 PR 描述中补一段简短的 release note 摘要，方便后续直接复用。

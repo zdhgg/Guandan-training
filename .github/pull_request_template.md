@@ -1,49 +1,49 @@
-## Summary
+## 概述
 
-- What does this PR change?
-- Why is this change needed?
+- 这个 PR 改了什么？
+- 为什么需要这次改动？
 
-## Related issue
+## 关联 issue
 
 - Closes #
 - Related to #
 
-## Type of change
+## 改动类型
 
-- [ ] Bug fix
-- [ ] Feature
-- [ ] Refactor
-- [ ] Documentation
-- [ ] Test improvement
-- [ ] CI / tooling
+- [ ] Bug 修复
+- [ ] 新功能
+- [ ] 重构
+- [ ] 文档更新
+- [ ] 测试改进
+- [ ] CI / 工具链
 
-## What changed
+## 具体改动
 
 - 
 
-## How it was tested
+## 验证方式
 
 - [ ] `cd backend && npm test`
 - [ ] `cd backend && npm run build`
 - [ ] `cd frontend && npm test`
 - [ ] `cd frontend && npm run build`
-- [ ] Manual verification
+- [ ] 手动验证
 
-Manual verification notes:
+手动验证补充说明：
 
 - 
 
-## Screenshots or recordings
+## 截图或录屏
 
-If the UI changed, add screenshots or a short recording.
+如果涉及界面变化，请补充截图或简短录屏。
 
 ## Release note
 
-Provide a short summary that maintainers can reuse in release notes.
+请补一段简短摘要，方便维护者直接复用到 release notes 中。
 
-## Checklist
+## 自查清单
 
-- [ ] I kept the change focused and avoided unrelated edits
-- [ ] I updated docs if behavior or setup changed
-- [ ] I added or updated tests when behavior changed
-- [ ] I did not include local-only files such as `.env`, `dist/`, or `node_modules/`
+- [ ] 我已尽量保持改动聚焦，没有混入无关修改
+- [ ] 如果行为或安装方式变化，我已同步更新文档
+- [ ] 如果行为变化，我已补充或更新测试
+- [ ] 我没有提交 `.env`、`dist/`、`node_modules/` 等本地文件

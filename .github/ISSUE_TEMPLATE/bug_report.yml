@@ -1,81 +1,81 @@
-name: Bug report
-description: Report a defect, regression, or broken workflow
-title: "[Bug]: "
+name: Bug 反馈
+description: 提交缺陷、回归问题或异常流程
+title: "[Bug] "
 body:
   - type: markdown
     attributes:
       value: |
-        Thanks for reporting a problem.
+        感谢反馈问题。
 
-        You can write this form in Chinese or English.
+        你可以使用中文或英文填写此表单。
   - type: textarea
     id: summary
     attributes:
-      label: Summary
-      description: What is broken?
-      placeholder: A short description of the bug
+      label: 问题概述
+      description: 当前出现了什么问题？
+      placeholder: 请简要描述这个 bug
     validations:
       required: true
   - type: textarea
     id: steps
     attributes:
-      label: Steps to reproduce
-      description: List the exact steps so we can reproduce the issue
+      label: 复现步骤
+      description: 请尽量列出可稳定复现问题的步骤
       placeholder: |
-        1. Go to ...
-        2. Click ...
-        3. See error ...
+        1. 进入 ...
+        2. 点击 ...
+        3. 出现 ...
     validations:
       required: true
   - type: textarea
     id: expected
     attributes:
-      label: Expected behavior
-      placeholder: What did you expect to happen?
+      label: 期望结果
+      placeholder: 你原本预期会发生什么？
     validations:
       required: true
   - type: textarea
     id: actual
     attributes:
-      label: Actual behavior
-      placeholder: What happened instead?
+      label: 实际结果
+      placeholder: 实际发生了什么？
     validations:
       required: true
   - type: dropdown
     id: area
     attributes:
-      label: Affected area
+      label: 影响范围
       options:
-        - Frontend
-        - Backend
-        - Battle mode
-        - Training mode
-        - LLM settings / integration
-        - Build / CI
-        - Documentation
-        - Other
+        - 前端
+        - 后端
+        - 实战模式
+        - 训练模式
+        - LLM 设置 / 集成
+        - 构建 / CI
+        - 文档
+        - 其他
     validations:
       required: true
   - type: textarea
     id: logs
     attributes:
-      label: Error logs, screenshots, or request details
-      description: Paste stack traces, browser errors, screenshots, or API details if available
+      label: 错误日志、截图或请求细节
+      description: 如果有堆栈、浏览器报错、截图或接口细节，请贴在这里
       render: text
   - type: textarea
     id: environment
     attributes:
-      label: Environment
-      description: Include OS, Node version, browser, and anything else relevant
+      label: 环境信息
+      description: 请补充操作系统、Node 版本、浏览器等信息
       placeholder: |
-        - OS:
-        - Node:
-        - Browser:
-        - Repo version / commit:
+        - 操作系统：
+        - Node 版本：
+        - 浏览器：
+        - 仓库版本 / 提交：
   - type: checkboxes
     id: checks
     attributes:
-      label: Confirmation
+      label: 确认项
       options:
-        - label: I checked the README / existing issues before opening this report
+        - label: 我已阅读 README，并检查过现有 issue 后再提交此问题
           required: true

@@ -1,11 +1,11 @@
 blank_issues_enabled: false
 contact_links:
-  - name: Usage and setup guide
+  - name: 使用与安装说明
     url: https://github.com/zdhgg/Guandan-training/blob/main/README.md
-    about: Check the README first for installation, local development, and release information
-  - name: Backend documentation
+    about: 优先查看 README，了解安装方式、本地开发和发布信息
+  - name: 后端文档
     url: https://github.com/zdhgg/Guandan-training/blob/main/backend/README.md
-    about: Backend API and environment setup details
-  - name: Frontend documentation
+    about: 查看后端 API 和环境配置说明
+  - name: 前端文档
     url: https://github.com/zdhgg/Guandan-training/blob/main/frontend/README.md
-    about: Frontend setup, environment variables, and local dev details
+    about: 查看前端启动方式、环境变量和本地开发说明
