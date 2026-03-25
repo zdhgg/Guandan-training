@@ -1,6 +1,12 @@
 # Guandan Training
 
+[![CI](https://github.com/zdhgg/Guandan-training/actions/workflows/ci.yml/badge.svg)](https://github.com/zdhgg/Guandan-training/actions/workflows/ci.yml)
+[![Release](https://img.shields.io/github/v/release/zdhgg/Guandan-training)](https://github.com/zdhgg/Guandan-training/releases/tag/v1.0.0)
+[![License](https://img.shields.io/github/license/zdhgg/Guandan-training)](https://github.com/zdhgg/Guandan-training/blob/main/LICENSE)
+
 Guandan Training is a monorepo for a Guandan practice system with a TypeScript backend and a Vue 3 frontend.
+
+一个面向掼蛋训练的智能化系统，支持理牌训练、实战模拟、全 AI 对战观战，以及 LLM 驱动的人格与策略调参。
 
 The current `1.0.0` scope focuses on:
 
