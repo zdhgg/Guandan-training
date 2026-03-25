@@ -1,6 +1,8 @@
 name: 功能建议
 description: 提出新功能或有价值的改进建议
 title: "[Feature] "
+labels:
+  - "status: needs-triage"
 body:
   - type: markdown
     attributes:

@@ -1,6 +1,8 @@
 name: Bug 反馈
 description: 提交缺陷、回归问题或异常流程
 title: "[Bug] "
+labels:
+  - "status: needs-triage"
 body:
   - type: markdown
     attributes:
